@@ -17,8 +17,8 @@ public class SelectorServer {
     private Selector selector;
 
     public SelectorServer() {
-        try (Selector selector = Selector.open()) {
-            this.selector = selector;
+        try {
+            this.selector = Selector.open();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,6 +34,7 @@ public class SelectorServer {
 
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
+                iterator.remove();
                 if (key.isAcceptable()) {
                     ServerSocketChannel channel = (ServerSocketChannel) key.channel();
                     SocketChannel socketChannel = channel.accept();
@@ -59,7 +60,7 @@ public class SelectorServer {
             channel.socket().bind(new InetSocketAddress(port));
             // for Non-blocking I/O
             channel.configureBlocking(false);
-            channel.register(selector, SelectionKey.OP_ACCEPT | SelectionKey.OP_CONNECT);
+            channel.register(selector, SelectionKey.OP_ACCEPT);
         } catch (IOException e) {
             e.printStackTrace();
         }
