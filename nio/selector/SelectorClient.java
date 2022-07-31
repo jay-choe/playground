@@ -36,7 +36,7 @@ public class SelectorClient {
         }
     }
 
-    private void connect() throws IOException {
+    private void connect() throws IOException, InterruptedException {
         while (true) {
             selector.select();
             Set<SelectionKey> keys = selector.selectedKeys();
@@ -47,9 +47,14 @@ public class SelectorClient {
                 iterator.remove();  // declare for saying done event processing
                 if (selectionKey.isConnectable()) {
                     SocketChannel channel = (SocketChannel) selectionKey.channel();
-//                    if (channel.isConnectionPending()) channel.finishConnect();
+                    if (channel.isConnectionPending()) channel.finishConnect();
                     channel.configureBlocking(false);
                     System.out.println("Connected To Server");
+                    if (!channel.isConnected()) {
+                        System.out.println("Not Yet Connected");
+                        while (!channel.isConnected())
+                            ;
+                    }
                     channel.write(ByteBuffer.wrap("Hello From Client".getBytes(StandardCharsets.UTF_8)));
                     channel.register(selector, SelectionKey.OP_READ);
                 } else if (selectionKey.isReadable()) {
@@ -72,7 +77,7 @@ public class SelectorClient {
             list.close();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         SelectorClient selectorClient = new SelectorClient();
         selectorClient.init();
         selectorClient.connect();

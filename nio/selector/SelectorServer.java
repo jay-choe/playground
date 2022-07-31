@@ -39,14 +39,15 @@ public class SelectorServer {
                     ServerSocketChannel channel = (ServerSocketChannel) key.channel();
                     SocketChannel socketChannel = channel.accept();
                     System.out.println("=======Accepted========");
-                    socketChannel.write(ByteBuffer.wrap("Hello".getBytes(StandardCharsets.UTF_8)));
-
+                    socketChannel.write(ByteBuffer.wrap("Hello From Server"
+                        .getBytes(StandardCharsets.UTF_8)));
                 } else if (key.isReadable()) {
                     SocketChannel channel = (SocketChannel) key.channel();
                     ByteBuffer buffer = ByteBuffer.allocate(Config.BUFFER_SIZE);
                     channel.read(buffer);
                     byte[] data = buffer.array();
                     String msg = new String(data).trim();
+                    System.out.println(msg);
                     buffer.clear();
                 }
             }
@@ -56,10 +57,14 @@ public class SelectorServer {
     private void init(int port) {
         assert port > 0 && String.valueOf(port).length() > 3;
 
-        try (ServerSocketChannel channel = ServerSocketChannel.open()) {
+        try {
+            ServerSocketChannel channel = ServerSocketChannel.open();
             channel.socket().bind(new InetSocketAddress(port));
             // for Non-blocking I/O
             channel.configureBlocking(false);
+            channel.supportedOptions()
+                .stream()
+                .forEach(System.out::println);
             channel.register(selector, SelectionKey.OP_ACCEPT);
         } catch (IOException e) {
             e.printStackTrace();
