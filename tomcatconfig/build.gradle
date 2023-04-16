@@ -14,6 +14,10 @@ configurations {
     }
 }
 
+bootRun {
+    jvmArgs = ["-verbose:gc", "-Xlog:gc*", "-Xlog:time", "-Xlog:safepoint"]
+}
+
 repositories {
     mavenCentral()
 }
